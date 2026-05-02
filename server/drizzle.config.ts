@@ -10,7 +10,7 @@ import {
 export default {
   driver: "pg",
   schema: "./src/model",
-  out: "./src/drizzle",
+  out: "./drizzle",
   dbCredentials: {
     host: POSTGRES_HOST as string,
     port: POSTGRES_PORT as number,

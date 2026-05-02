@@ -10,6 +10,8 @@ import { REDIS_SECRET } from "./config";
 
 //import for routes
 import authRoute from "./routes/api/auth";
+import campaignRoute from "./routes/api/campaign";
+import sessionRoute from "./routes/api/session";
 
 const app = express();
 
@@ -52,6 +54,8 @@ app.get("/api/v1/ping", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/campaign", campaignRoute);
+app.use("/api/v1/session", sessionRoute);
 
 app.use(errorHandler);
 

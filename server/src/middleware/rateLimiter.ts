@@ -71,6 +71,7 @@ const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
       console.info(
         "Request made by user who isn't logged in and could not identify their IP address. Check if the request is from localhost!"
       );
+      next();
     }
   }
 };

@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: ".env.local" });
 
 //Express Config
-export const EXPRESS_SERVER_PORT = process.env.EXPRESS_SERVER_PORT || 5000;
+export const EXPRESS_SERVER_PORT = process.env.EXPRESS_SERVER_PORT || 3001;
 
 //Postgres Config
 export const POSTGRES_URL = process.env.POSTGRES_URL;

@@ -26,9 +26,11 @@
     "drizzle-orm": "^0.30.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "nanoid": "^5.1.11",
     "pg": "^8.11.3",
     "postgres": "^3.4.4",
     "redis": "^4.6.13",
+    "socket.io": "^4.8.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
