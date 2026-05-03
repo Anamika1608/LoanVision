@@ -11,25 +11,19 @@ def preload_models():
     print("\n=== Loading AI models ===\n")
     total_start = time.time()
 
-    print("[1/4] Loading Whisper (STT)...")
-    t = time.time()
-    from services.whisper_stt import get_model
-    get_model()
-    print(f"       Done in {time.time() - t:.1f}s")
-
-    print("[2/4] Loading MediaPipe (face detection + liveness)...")
+    print("[1/3] Loading MediaPipe (face detection + liveness)...")
     t = time.time()
     from services.mediapipe_shared import get_landmarker
     get_landmarker()
     print(f"       Done in {time.time() - t:.1f}s")
 
-    print("[3/4] Loading ViT Age/Gender model...")
+    print("[2/3] Loading ViT Age/Gender model...")
     t = time.time()
     from services.face_analysis import get_age_gender_model
     get_age_gender_model()
     print(f"       Done in {time.time() - t:.1f}s")
 
-    print("[4/4] Initializing Groq LLM...")
+    print("[3/3] Initializing Groq LLM...")
     t = time.time()
     from services.llm_agent import get_llm
     get_llm()

@@ -3,7 +3,8 @@ class PCMProcessor extends AudioWorkletProcessor {
     super();
     this._buffer = [];
     this._sampleCount = 0;
-    this._chunkSize = 16000 * 4; // 4 seconds at 16kHz
+    this._chunkSize = 16000 * 7; // 7 seconds at 16kHz
+    this._energyThreshold = 0.01; // RMS threshold to detect speech
   }
 
   process(inputs) {
@@ -17,10 +18,21 @@ class PCMProcessor extends AudioWorkletProcessor {
     }
 
     if (this._sampleCount >= this._chunkSize) {
-      this.port.postMessage({
-        type: "audio-chunk",
-        pcmData: new Float32Array(this._buffer),
-      });
+      const pcm = new Float32Array(this._buffer);
+
+      let sumSq = 0;
+      for (let i = 0; i < pcm.length; i++) {
+        sumSq += pcm[i] * pcm[i];
+      }
+      const rms = Math.sqrt(sumSq / pcm.length);
+
+      if (rms > this._energyThreshold) {
+        this.port.postMessage({
+          type: "audio-chunk",
+          pcmData: pcm,
+        });
+      }
+
       this._buffer = [];
       this._sampleCount = 0;
     }

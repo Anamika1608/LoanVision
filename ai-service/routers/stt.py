@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 
 from schemas.types import TranscribeResponse
 from services import redis_client, whisper_stt
-from utils.audio import ensure_wav, wav_to_numpy
+from utils.audio import ensure_wav
 
 router = APIRouter()
 
@@ -19,10 +19,9 @@ async def transcribe_audio(
         raise HTTPException(status_code=400, detail="Empty audio file")
 
     wav_bytes = ensure_wav(audio_bytes)
-    audio_numpy = wav_to_numpy(wav_bytes)
 
     loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(None, whisper_stt.transcribe, audio_numpy)
+    result = await loop.run_in_executor(None, whisper_stt.transcribe, wav_bytes)
 
     await redis_client.publish(f"transcript:{session_id}", result)
 
