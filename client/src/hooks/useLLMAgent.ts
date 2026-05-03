@@ -10,6 +10,8 @@ export function useLLMAgent(sessionId: string | undefined) {
   const [agentMessage, setAgentMessage] = useState("");
   const [entities, setEntities] = useState<Record<string, unknown>>({});
   const [shouldEndCall, setShouldEndCall] = useState(false);
+  const [requestIdUpload, setRequestIdUpload] = useState(false);
+  const [verificationFailed, setVerificationFailed] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const conversationHistory = useRef<ConversationEntry[]>([]);
 
@@ -28,11 +30,13 @@ export function useLLMAgent(sessionId: string | undefined) {
           cv_results: cvResults,
         });
 
-        const { next_question, entities_extracted, should_end_call } = data;
+        const { next_question, entities_extracted, should_end_call, request_id_upload, verification_failed } = data;
 
         setAgentMessage(next_question);
         setEntities(entities_extracted || {});
         setShouldEndCall(should_end_call || false);
+        if (request_id_upload) setRequestIdUpload(true);
+        if (verification_failed) setVerificationFailed(true);
 
         conversationHistory.current.push({ role: "assistant", content: next_question });
       } catch (err) {
@@ -44,5 +48,5 @@ export function useLLMAgent(sessionId: string | undefined) {
     [sessionId]
   );
 
-  return { agentMessage, entities, shouldEndCall, isThinking, processTranscript };
+  return { agentMessage, entities, shouldEndCall, requestIdUpload, verificationFailed, isThinking, processTranscript };
 }

@@ -12,6 +12,8 @@ import { REDIS_SECRET } from "./config";
 import authRoute from "./routes/api/auth";
 import campaignRoute from "./routes/api/campaign";
 import sessionRoute from "./routes/api/session";
+import applicationRoute from "./routes/api/application";
+import dashboardRoute from "./routes/api/dashboard";
 
 const app = express();
 
@@ -26,6 +28,7 @@ declare module "express-session" {
   interface SessionData {
     userId: string;
     email: string;
+    role: "admin" | "user";
   }
 }
 
@@ -56,6 +59,8 @@ app.get("/api/v1/ping", (req, res) => {
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/campaign", campaignRoute);
 app.use("/api/v1/session", sessionRoute);
+app.use("/api/v1/application", applicationRoute);
+app.use("/api/v1/dashboard", dashboardRoute);
 
 app.use(errorHandler);
 

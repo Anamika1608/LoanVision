@@ -8,7 +8,9 @@ export const registerSchema = z.object({
       .string()
       .min(1, { message: "Please enter email address!" })
       .email("Please enter valid email address!"),
-    password: z.string().min(8, { message: "Please enter password of length 8 or more!" })
+    password: z.string().min(8, { message: "Please enter password of length 8 or more!" }),
+    confirmPassword: z.string().min(1, { message: "Please confirm your password!" }),
+    phone: z.string().optional(),
   })
 });
 

@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 import sys
@@ -8,6 +9,8 @@ import torch
 from PIL import Image
 from transformers import AutoConfig, AutoImageProcessor
 from huggingface_hub import hf_hub_download
+
+_HF_TOKEN = os.getenv("HF_TOKEN")
 
 from services.mediapipe_shared import get_landmarker
 
@@ -20,7 +23,7 @@ MODEL_ID = "abhilash88/age-gender-prediction"
 
 
 def _get_model_class():
-    model_py = hf_hub_download(MODEL_ID, "model.py")
+    model_py = hf_hub_download(MODEL_ID, "model.py", token=_HF_TOKEN)
     import importlib.util
     spec = importlib.util.spec_from_file_location("age_gender_model", model_py)
     mod = importlib.util.module_from_spec(spec)
@@ -36,12 +39,12 @@ def get_age_gender_model():
             if _model is None:
                 start = time.time()
                 AgeGenderViTModel = _get_model_class()
-                config = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
+                config = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True, token=_HF_TOKEN)
                 _model = AgeGenderViTModel.from_pretrained(
-                    MODEL_ID, config=config, trust_remote_code=True
+                    MODEL_ID, config=config, trust_remote_code=True, token=_HF_TOKEN
                 )
                 _model.eval()
-                _processor = AutoImageProcessor.from_pretrained(MODEL_ID, do_center_crop=False)
+                _processor = AutoImageProcessor.from_pretrained(MODEL_ID, do_center_crop=False, token=_HF_TOKEN)
                 _load_time = time.time() - start
                 print(f"[vit-age-gender] Model loaded in {_load_time:.1f}s")
     return _model, _processor

@@ -39,17 +39,21 @@ app.include_router(llm.router, prefix="/llm", tags=["LLM"])
 
 @app.get("/health")
 async def health():
-    from services.whisper_stt import is_loaded as whisper_loaded
     from services.mediapipe_shared import is_loaded as mediapipe_loaded
     from services.face_analysis import is_loaded as vit_loaded
+    from services.face_matching import is_retinaface_loaded as retinaface_loaded, is_facenet_loaded as arcface_loaded
+    from services.id_ocr import is_loaded as ocr_loaded
     from services.llm_agent import is_loaded as llm_loaded
 
     return {
         "status": "ok",
         "models_loaded": {
-            "whisper": whisper_loaded(),
+            "whisper_groq": True,
             "mediapipe": mediapipe_loaded(),
             "vit_age_gender": vit_loaded(),
-            "groq": llm_loaded(),
+            "retinaface": retinaface_loaded(),
+            "arcface": arcface_loaded(),
+            "paddleocr": ocr_loaded(),
+            "groq_llm": llm_loaded(),
         },
     }

@@ -3,10 +3,11 @@ import { Router } from "express";
 import { createCampaignSchema, validateCampaignCodeSchema } from "src/controller/campaign/campaignSchema";
 import { createCampaign, validateCampaignCode, listCampaigns } from "src/controller/campaign/campaignController";
 import { validateRequest } from "src/middleware/validateRequest";
+import { onlyAdmin } from "src/middleware/authCheck";
 
 const router = Router();
 
-router.route("/").post(validateRequest(createCampaignSchema), async (req, res, next) => {
+router.route("/").post(onlyAdmin, validateRequest(createCampaignSchema), async (req, res, next) => {
   try {
     const { name, channel, productType, maxUses, expiresAt } = req.body;
     const newCampaign = await createCampaign(name, channel, productType, maxUses, expiresAt);
