@@ -4,6 +4,12 @@ LoanVision AI is an end-to-end video-based digital loan origination system that 
 
 Built with 6 open-source ML models running locally: Whisper V3 (STT), InsightFace ArcFace (face matching), MediaPipe (liveness), ViT (age/gender), PaddleOCR (ID extraction), and LLaMA 3.3 70B via Groq (conversational agent + risk classification).
 
+## Demo Video
+
+[![Watch the demo](https://drive.google.com/thumbnail?id=1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1&sz=w1280)](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
+
+[Watch full demo on Google Drive](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
+
 ## Flow Diagram
 
 ![LoanVision Flow](loanvision-flow.png)
