@@ -273,5 +273,5 @@ tenzorx-hack/
 │   ├── start.py             # Entry point (preloads models + starts server)
 │   └── requirements.txt     # Python dependencies
 ├── loanvision-flow.png      # System flow diagram
-└── loanvision-arch.png      # Architecture diagram
+└── loanvision-arch.png      # Architecture diagram of repo
 ```
