@@ -7,6 +7,7 @@ export interface FaceResult {
   age?: number;
   gender?: string;
   bbox?: { x: number; y: number; width: number; height: number };
+  face_match_score?: number | null;
   liveness?: { ear_left?: number; ear_right?: number };
 }
 

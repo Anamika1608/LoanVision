@@ -24,6 +24,11 @@ export default function FaceIndicator({ faceResult }: FaceIndicatorProps) {
           {faceResult.gender}
         </div>
       )}
+      {faceResult.face_match_score != null && (
+        <div className={faceResult.face_match_score > 0.6 ? "text-green-300" : "text-red-300"}>
+          Face match: {(faceResult.face_match_score * 100).toFixed(0)}%
+        </div>
+      )}
     </div>
   );
 }

@@ -2,8 +2,8 @@ import asyncio
 
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 
-from schemas.types import AnalyzeFrameResponse, LivenessChallengeResponse, LivenessDetails
-from services import redis_client, face_analysis, liveness
+from schemas.types import AnalyzeFrameResponse, RegisterIdPhotoResponse, LivenessChallengeResponse, LivenessDetails
+from services import redis_client, face_analysis, liveness, face_matching, id_ocr
 from utils.image import bytes_to_rgb
 
 router = APIRouter()
@@ -30,11 +30,17 @@ async def analyze_frame(
 
     liveness_result = await loop.run_in_executor(None, liveness.check_blink, image_rgb)
 
+    face_match_score = None
+    if face_matching.has_id_registered(session_id):
+        match_result = await loop.run_in_executor(None, face_matching.compare_faces, session_id, image_rgb)
+        face_match_score = match_result.get("score")
+
     response = AnalyzeFrameResponse(
         face_detected=True,
         age=result["age"],
         gender=result["gender"],
         bbox=result["bbox"],
+        face_match_score=face_match_score,
         liveness=LivenessDetails(
             ear_left=liveness_result.get("ear_left"),
             ear_right=liveness_result.get("ear_right"),
@@ -45,15 +51,46 @@ async def analyze_frame(
         "face_detected": True,
         "age": result["age"],
         "gender": result["gender"],
+        "face_match_score": face_match_score,
     }
     await redis_client.publish(f"cv_result:{session_id}", publish_data)
 
     return response
 
 
-@router.post("/register-id-photo")
-async def register_id_photo():
-    raise HTTPException(status_code=501, detail="Face matching temporarily unavailable")
+@router.post("/register-id-photo", response_model=RegisterIdPhotoResponse)
+async def register_id_photo(
+    file: UploadFile = File(...),
+    session_id: str = Form(...),
+):
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty image file")
+
+    image_rgb = bytes_to_rgb(image_bytes)
+
+    loop = asyncio.get_event_loop()
+
+    face_result, ocr_result = await asyncio.gather(
+        loop.run_in_executor(None, face_matching.register_id_face, session_id, image_rgb),
+        loop.run_in_executor(None, id_ocr.extract_id_data, image_rgb),
+    )
+
+    print(f"[cv/register-id-photo] session={session_id}")
+    print(f"  face_result: {face_result}")
+    print(f"  ocr_result: name={ocr_result.get('full_name')}, dob={ocr_result.get('date_of_birth')}, "
+          f"id={ocr_result.get('id_number')}, type={ocr_result.get('id_type')}")
+
+    await redis_client.publish(f"id_verification:{session_id}", {
+        "face_registered": face_result.get("registered", False),
+        "id_data": ocr_result,
+    })
+
+    return RegisterIdPhotoResponse(
+        registered=face_result.get("registered", False),
+        face_detected=face_result.get("face_detected", False),
+        id_data=ocr_result,
+    )
 
 
 @router.post("/liveness-challenge", response_model=LivenessChallengeResponse)

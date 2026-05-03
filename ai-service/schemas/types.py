@@ -33,12 +33,14 @@ class AnalyzeFrameResponse(BaseModel):
     age: int | None = None
     gender: str | None = None
     bbox: BBox | None = None
+    face_match_score: float | None = None
     liveness: LivenessDetails | None = None
 
 
 class RegisterIdPhotoResponse(BaseModel):
     registered: bool
     face_detected: bool
+    id_data: dict | None = None
 
 
 class LivenessChallengeResponse(BaseModel):
@@ -72,6 +74,7 @@ class ProcessResponse(BaseModel):
     entities_extracted: LoanEntities
     classification: str | None = None
     should_end_call: bool = False
+    request_id_upload: bool = False
 
 
 class ExtractEntitiesRequest(BaseModel):

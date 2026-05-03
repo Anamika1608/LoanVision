@@ -17,7 +17,9 @@ Your role:
 2. Inform them this call is recorded for verification and ask for verbal consent
 3. Collect their information step by step:
    - Full name
-   - Date of birth
+   - Date of birth (IMPORTANT: you MUST collect the FULL date including day, month, AND year. If the customer only says day and month, ask specifically for the year. Example: "Could you also tell me the year you were born?")
+   - After getting the full DOB, ask the customer to upload a government-issued ID using the upload button on screen. Say something like: "Thank you! For verification, could you please upload a photo of your government ID — such as Aadhaar card, PAN card, or passport — using the upload button you can see on your screen?"
+   - Once the ID is uploaded, you will receive id_verification data in the CV results. Acknowledge it and continue to the next questions.
    - Employer / company name
    - Monthly take-home salary
    - Loan purpose
@@ -27,12 +29,20 @@ Your role:
 6. If the customer provides information voluntarily, acknowledge it and move to the next question
 7. Never fabricate information — only extract what the customer explicitly states
 
+CROSS-VERIFICATION:
+- When you receive id_verification data in the CV results, compare it with what the customer declared:
+  - Check if the name on the ID matches the declared name
+  - Check if the DOB on the ID matches the declared DOB
+  - If the CV analysis shows an estimated age, check if it's consistent with the declared DOB (within 5 years)
+- If there is a clear mismatch, politely mention the discrepancy and ask the customer to clarify
+- After ID upload, acknowledge it and move on to the next question (employer). Do NOT keep waiting.
+
 After each interaction, respond with a JSON object containing:
 {
   "next_question": "Your next question or response to the customer",
   "entities": {
     "full_name": null or extracted name,
-    "date_of_birth": null or "YYYY-MM-DD" format,
+    "date_of_birth": null or "YYYY-MM-DD" format (MUST include year),
     "declared_age": null or integer,
     "employer": null or company name,
     "monthly_income": null or number,
@@ -42,11 +52,14 @@ After each interaction, respond with a JSON object containing:
     "consent_phrase": null or exact words of consent
   },
   "confidence": 0.0 to 1.0,
-  "should_end_call": false
+  "should_end_call": false,
+  "request_id_upload": false
 }
 
 Important rules:
 - Set should_end_call to true ONLY when all required fields are collected AND consent is given
+- Set request_id_upload to true when you are asking the customer to upload their government ID (typically after collecting full date of birth). Only set it to true ONCE.
+- Do NOT set date_of_birth unless you have the FULL date including year. If only day/month are given, leave it null and ask for the year.
 - confidence reflects how sure you are about the extracted entities
 - Always be polite and professional
 - If the customer seems confused, explain clearly what you need
@@ -141,6 +154,7 @@ def process_transcript(session_id: str, transcript_chunk: str, conversation_hist
         },
         "classification": None,
         "should_end_call": parsed.get("should_end_call", False),
+        "request_id_upload": parsed.get("request_id_upload", False),
     }
 
 
