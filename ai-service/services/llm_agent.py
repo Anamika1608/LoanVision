@@ -3,16 +3,12 @@ import os
 import time
 import threading
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 _llm = None
 _lock = threading.Lock()
 _load_time: float = 0
-
-_rate_limit_calls: list[float] = []
-_rate_lock = threading.Lock()
-MAX_CALLS_PER_MINUTE = 14  # stay under 15 RPM
 
 SYSTEM_PROMPT = """You are LoanVision AI, a professional and friendly loan onboarding agent conducting a video-based loan application.
 
@@ -63,29 +59,18 @@ def get_llm():
         with _lock:
             if _llm is None:
                 start = time.time()
-                os.environ.setdefault("GOOGLE_API_KEY", os.getenv("GEMINI_API_KEY", ""))
-                _llm = ChatGoogleGenerativeAI(
-                    model="gemini-2.0-flash",
+                _llm = ChatGroq(
+                    model="llama-3.3-70b-versatile",
+                    api_key=os.getenv("GROQ_API_KEY"),
                     temperature=0.3,
                 )
                 _load_time = time.time() - start
-                print(f"[gemini] LLM initialized in {_load_time:.1f}s")
+                print(f"[groq] LLM initialized in {_load_time:.1f}s")
     return _llm
 
 
 def is_loaded() -> bool:
     return _llm is not None
-
-
-def _check_rate_limit():
-    with _rate_lock:
-        now = time.time()
-        _rate_limit_calls[:] = [t for t in _rate_limit_calls if now - t < 60]
-        if len(_rate_limit_calls) >= MAX_CALLS_PER_MINUTE:
-            wait_time = 60 - (now - _rate_limit_calls[0])
-            if wait_time > 0:
-                time.sleep(wait_time)
-        _rate_limit_calls.append(time.time())
 
 
 def _parse_response(content: str) -> dict:
@@ -96,16 +81,31 @@ def _parse_response(content: str) -> dict:
             content = content.split("```")[1].split("```")[0]
         return json.loads(content.strip())
     except (json.JSONDecodeError, IndexError):
-        return {
-            "next_question": content,
-            "entities": {},
-            "confidence": 0.0,
-            "should_end_call": False,
-        }
+        pass
+
+    start = content.find("{")
+    if start != -1:
+        depth = 0
+        for i in range(start, len(content)):
+            if content[i] == "{":
+                depth += 1
+            elif content[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        return json.loads(content[start:i + 1])
+                    except json.JSONDecodeError:
+                        break
+
+    return {
+        "next_question": content.split("{")[0].strip() if "{" in content else content,
+        "entities": {},
+        "confidence": 0.0,
+        "should_end_call": False,
+    }
 
 
 def process_transcript(session_id: str, transcript_chunk: str, conversation_history: list, cv_results: dict) -> dict:
-    _check_rate_limit()
     llm = get_llm()
 
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
@@ -145,7 +145,6 @@ def process_transcript(session_id: str, transcript_chunk: str, conversation_hist
 
 
 def extract_entities(full_transcript: str) -> dict:
-    _check_rate_limit()
     llm = get_llm()
 
     prompt = f"""Extract loan application entities from this transcript. Return ONLY a JSON object with these fields:
@@ -175,7 +174,6 @@ Transcript:
 
 
 def classify_risk(entities: dict, cv_results: dict, geo_data: dict) -> dict:
-    _check_rate_limit()
     llm = get_llm()
 
     prompt = f"""You are a risk assessment engine. Based on the following data, classify the loan application risk.
