@@ -3,7 +3,13 @@ Problem Statement 3 - Agentic AI Video Call–Based Onboarding
 
 Video-Based Digital Loan Origination & Risk Assessment System
 
+## Flow Diagram
+
 ![LoanVision Flow](loanvision-flow.png)
+
+## Architecture Diagram
+
+![LoanVision Architecture](loanvision-arch.png)
 
  
 1. Problem Statement
