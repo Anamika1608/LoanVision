@@ -11,7 +11,11 @@ export default defineConfig({
       "/socket.io": {
         target: "http://localhost:3001",
         ws: true
-      }
+      },
+      "/stt": "http://localhost:8000",
+      "/cv": "http://localhost:8000",
+      "/llm": "http://localhost:8000",
+      "/health": "http://localhost:8000"
     }
   }
 });
