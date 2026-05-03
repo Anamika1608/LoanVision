@@ -1,9 +1,11 @@
 import asyncio
 import os
+import threading
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, File, Form, Query, UploadFile, HTTPException
 from fastapi.responses import FileResponse
+from geopy.geocoders import Nominatim
 
 from schemas.types import AnalyzeFrameResponse, RegisterIdPhotoResponse, LivenessChallengeResponse, LivenessDetails
 from services import redis_client, face_analysis, liveness, face_matching, id_ocr
@@ -11,6 +13,13 @@ from utils.image import bytes_to_rgb
 
 UPLOADS_DIR = Path(__file__).parent.parent / "uploads" / "id-photos"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+SCREENSHOTS_DIR = Path(__file__).parent.parent / "uploads" / "screenshots"
+SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+_geocoder = Nominatim(user_agent="loanvision-ai", timeout=5)
+_geo_cache: dict[str, str | None] = {}
+_geo_lock = threading.Lock()
 
 router = APIRouter()
 
@@ -146,3 +155,61 @@ async def liveness_challenge(
             yaw=details.get("yaw"),
         ),
     )
+
+
+@router.post("/save-screenshot")
+async def save_screenshot(
+    file: UploadFile = File(...),
+    session_id: str = Form(...),
+):
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty image file")
+
+    path = SCREENSHOTS_DIR / f"{session_id}.jpg"
+    path.write_bytes(image_bytes)
+    print(f"[cv/save-screenshot] Saved screenshot: {path}")
+    return {"saved": True, "path": f"/cv/screenshot/{session_id}"}
+
+
+@router.get("/screenshot/{session_id}")
+async def get_screenshot(session_id: str):
+    for ext in [".jpg", ".jpeg", ".png"]:
+        path = SCREENSHOTS_DIR / f"{session_id}{ext}"
+        if path.exists():
+            return FileResponse(path)
+    raise HTTPException(status_code=404, detail="Screenshot not found")
+
+
+@router.get("/reverse-geocode")
+async def reverse_geocode(lat: float = Query(...), lon: float = Query(...)):
+    cache_key = f"{lat:.4f},{lon:.4f}"
+
+    with _geo_lock:
+        if cache_key in _geo_cache:
+            return {"location": _geo_cache[cache_key]}
+
+    loop = asyncio.get_event_loop()
+    try:
+        location = await loop.run_in_executor(None, _geocoder.reverse, f"{lat}, {lon}")
+        if location and location.raw.get("address"):
+            addr = location.raw["address"]
+            parts = []
+            for key in ["suburb", "city", "town", "village", "state_district", "state"]:
+                if key in addr and addr[key] not in parts:
+                    parts.append(addr[key])
+                if len(parts) >= 3:
+                    break
+            resolved = ", ".join(parts) if parts else str(location.address)
+        elif location:
+            resolved = str(location.address)
+        else:
+            resolved = None
+    except Exception as e:
+        print(f"[cv/reverse-geocode] Error: {e}")
+        resolved = None
+
+    with _geo_lock:
+        _geo_cache[cache_key] = resolved
+
+    return {"location": resolved}

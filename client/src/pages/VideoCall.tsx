@@ -9,6 +9,7 @@ import { useTranscription } from "../hooks/useTranscription";
 import { useFaceAnalysis } from "../hooks/useFaceAnalysis";
 import { useLLMAgent } from "../hooks/useLLMAgent";
 import { useLiveness } from "../hooks/useLiveness";
+import { captureFrame } from "../lib/frameCapture";
 import CallControls from "../components/CallControls";
 import TranscriptPanel from "../components/TranscriptPanel";
 import AgentBubble from "../components/AgentBubble";
@@ -99,6 +100,21 @@ export default function VideoCall() {
     const timer = setTimeout(() => triggerChallenge("blink"), 15000);
     return () => clearTimeout(timer);
   }, [isActive]);
+
+  // Capture a screenshot at 10 seconds for the dashboard
+  useEffect(() => {
+    if (!isActive || !sessionId) return;
+    const timer = setTimeout(async () => {
+      if (!videoRef.current) return;
+      const blob = await captureFrame(videoRef.current);
+      if (!blob) return;
+      const formData = new FormData();
+      formData.append("file", blob, "screenshot.jpg");
+      formData.append("session_id", sessionId);
+      axios.post("/cv/save-screenshot", formData).catch(console.error);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [isActive, sessionId]);
 
   // Show ID upload when agent requests it (via flag or message content)
   useEffect(() => {

@@ -55,3 +55,13 @@ export async function declineOffer(sessionId: string) {
   const { data } = await api.patch(`/application/${sessionId}/offer/decline`);
   return data;
 }
+
+export async function getDashboardData() {
+  const { data } = await api.get("/dashboard");
+  return data;
+}
+
+export async function getApplicationDetail(applicationId: string) {
+  const { data } = await api.get(`/dashboard/application/${applicationId}`);
+  return data;
+}
