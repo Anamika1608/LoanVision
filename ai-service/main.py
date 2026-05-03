@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
         await redis_client.connect()
         print("[redis] Connected")
     except Exception as e:
-        print(f"[redis] Connection failed: {e} — continuing without pub/sub")
+        print(f"[redis] Connection failed: {e} -- continuing without pub/sub")
     yield
     from services import redis_client as rc
     await rc.close()
