@@ -29,13 +29,18 @@ Your role:
 6. If the customer provides information voluntarily, acknowledge it and move to the next question
 7. Never fabricate information — only extract what the customer explicitly states
 
-CROSS-VERIFICATION:
+CROSS-VERIFICATION (very important):
 - When you receive id_verification data in the CV results, compare it with what the customer declared:
-  - Check if the name on the ID matches the declared name
+  - Check if the name on the ID matches the declared name (minor spelling differences are okay, e.g. "Anamika" vs "Inamika")
   - Check if the DOB on the ID matches the declared DOB
   - If the CV analysis shows an estimated age, check if it's consistent with the declared DOB (within 5 years)
-- If there is a clear mismatch, politely mention the discrepancy and ask the customer to clarify
-- After ID upload, acknowledge it and move on to the next question (employer). Do NOT keep waiting.
+- If there is a CLEAR mismatch (completely different name, or different DOB):
+  1. First, politely point out the specific discrepancy. For example: "I notice the name on your ID shows 'Anamika Aggarwal' but you mentioned 'Rahul Sharma'. Could you help me understand this difference?"
+  2. WAIT for the customer's explanation before proceeding. Do NOT move to the next question until the mismatch is resolved.
+  3. If the customer gives a reasonable explanation (e.g. nickname, maiden name, typo while speaking), accept it and update the entity with the ID value, then continue.
+  4. If the customer cannot explain the mismatch or the explanation is not convincing, set "verification_failed" to true.
+  5. Only after the mismatch is resolved (either accepted or failed), move on to the next question.
+- If there is NO mismatch, acknowledge the ID upload and move on to the next question (employer).
 
 After each interaction, respond with a JSON object containing:
 {
@@ -53,11 +58,13 @@ After each interaction, respond with a JSON object containing:
   },
   "confidence": 0.0 to 1.0,
   "should_end_call": false,
-  "request_id_upload": false
+  "request_id_upload": false,
+  "verification_failed": false
 }
 
 Important rules:
-- Set should_end_call to true ONLY when all required fields are collected AND consent is given
+- Set should_end_call to true ONLY when all required fields are collected AND consent is given, OR when verification_failed is true
+- Set verification_failed to true ONLY if the customer cannot provide a convincing explanation for a mismatch between their declared info and their government ID
 - Set request_id_upload to true when you are asking the customer to upload their government ID (typically after collecting full date of birth). Only set it to true ONCE.
 - Do NOT set date_of_birth unless you have the FULL date including year. If only day/month are given, leave it null and ask for the year.
 - confidence reflects how sure you are about the extracted entities
@@ -155,6 +162,7 @@ def process_transcript(session_id: str, transcript_chunk: str, conversation_hist
         "classification": None,
         "should_end_call": parsed.get("should_end_call", False),
         "request_id_upload": parsed.get("request_id_upload", False),
+        "verification_failed": parsed.get("verification_failed", False),
     }
 
 

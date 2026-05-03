@@ -1,10 +1,16 @@
 import asyncio
+import os
+from pathlib import Path
 
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi.responses import FileResponse
 
 from schemas.types import AnalyzeFrameResponse, RegisterIdPhotoResponse, LivenessChallengeResponse, LivenessDetails
 from services import redis_client, face_analysis, liveness, face_matching, id_ocr
 from utils.image import bytes_to_rgb
+
+UPLOADS_DIR = Path(__file__).parent.parent / "uploads" / "id-photos"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter()
 
@@ -67,6 +73,11 @@ async def register_id_photo(
     if not image_bytes:
         raise HTTPException(status_code=400, detail="Empty image file")
 
+    ext = os.path.splitext(file.filename or "photo.jpg")[1] or ".jpg"
+    id_photo_path = UPLOADS_DIR / f"{session_id}{ext}"
+    id_photo_path.write_bytes(image_bytes)
+    print(f"[cv/register-id-photo] Saved ID photo: {id_photo_path}")
+
     image_rgb = bytes_to_rgb(image_bytes)
 
     loop = asyncio.get_event_loop()
@@ -90,7 +101,17 @@ async def register_id_photo(
         registered=face_result.get("registered", False),
         face_detected=face_result.get("face_detected", False),
         id_data=ocr_result,
+        id_photo_path=f"/cv/id-photo/{session_id}",
     )
+
+
+@router.get("/id-photo/{session_id}")
+async def get_id_photo(session_id: str):
+    for ext in [".jpg", ".jpeg", ".png", ".webp"]:
+        path = UPLOADS_DIR / f"{session_id}{ext}"
+        if path.exists():
+            return FileResponse(path)
+    raise HTTPException(status_code=404, detail="ID photo not found")
 
 
 @router.post("/liveness-challenge", response_model=LivenessChallengeResponse)

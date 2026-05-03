@@ -41,6 +41,7 @@ class RegisterIdPhotoResponse(BaseModel):
     registered: bool
     face_detected: bool
     id_data: dict | None = None
+    id_photo_path: str | None = None
 
 
 class LivenessChallengeResponse(BaseModel):
@@ -75,6 +76,7 @@ class ProcessResponse(BaseModel):
     classification: str | None = None
     should_end_call: bool = False
     request_id_upload: bool = False
+    verification_failed: bool = False
 
 
 class ExtractEntitiesRequest(BaseModel):

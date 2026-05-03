@@ -37,12 +37,11 @@ export default function VideoCall() {
   const audioCapture = useAudioCapture();
   const { transcript, fullText, isProcessing, sendAudioChunk, addAgentMessage } = useTranscription(sessionId);
   const { faceResult, stopAnalysis } = useFaceAnalysis(sessionId, videoRef, isActive);
-  const { agentMessage, entities, shouldEndCall, requestIdUpload, isThinking, processTranscript } = useLLMAgent(sessionId);
+  const { agentMessage, entities, shouldEndCall, requestIdUpload, verificationFailed, isThinking, processTranscript } = useLLMAgent(sessionId);
   const [showIdUpload, setShowIdUpload] = useState(false);
   const [idUploaded, setIdUploaded] = useState(false);
   const [idUploading, setIdUploading] = useState(false);
   const [idVerification, setIdVerification] = useState<IdVerification | null>(null);
-  const [verificationMismatch, setVerificationMismatch] = useState<string[] | null>(null);
   const { activeChallenge, challengePassed, triggerChallenge, stopLiveness } = useLiveness(sessionId, videoRef, on);
 
   const [callDuration, setCallDuration] = useState(0);
@@ -119,35 +118,12 @@ export default function VideoCall() {
     processTranscript("[User uploaded government ID]", cvData);
   }, [idVerification]);
 
-  // Cross-verify ID data with declared entities when both are available
+  // Auto-end call when LLM signals completion or verification fails
   useEffect(() => {
-    if (!idVerification?.id_data) return;
-    const mismatches: string[] = [];
-    const idData = idVerification.id_data;
-
-    const declaredName = (entities.full_name as string)?.toLowerCase().trim();
-    const idName = idData.full_name?.toLowerCase().trim();
-    if (declaredName && idName && !idName.includes(declaredName.split(" ")[0]) && !declaredName.includes(idName.split(" ")[0])) {
-      mismatches.push(`Name mismatch: You said "${entities.full_name}" but ID shows "${idData.full_name}"`);
-    }
-
-    const declaredDob = entities.date_of_birth as string;
-    const idDob = idData.date_of_birth;
-    if (declaredDob && idDob && declaredDob !== idDob) {
-      mismatches.push(`DOB mismatch: You said "${declaredDob}" but ID shows "${idDob}"`);
-    }
-
-    if (mismatches.length > 0) {
-      setVerificationMismatch(mismatches);
-    }
-  }, [idVerification, entities]);
-
-  // Auto-end call when LLM signals completion
-  useEffect(() => {
-    if (shouldEndCall && !ending) {
+    if ((shouldEndCall || verificationFailed) && !ending) {
       setTimeout(handleEndCall, 3000);
     }
-  }, [shouldEndCall]);
+  }, [shouldEndCall, verificationFailed]);
 
   const handleIdUpload = async (file: File) => {
     if (!sessionId) return;
@@ -168,11 +144,6 @@ export default function VideoCall() {
     } finally {
       setIdUploading(false);
     }
-  };
-
-  const handleMismatchEndCall = async () => {
-    setVerificationMismatch(null);
-    await handleEndCall();
   };
 
   const handleEndCall = async () => {
@@ -212,32 +183,6 @@ export default function VideoCall() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
-      {/* Mismatch popup */}
-      {verificationMismatch && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md mx-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">⚠</span>
-              <h3 className="text-lg font-semibold text-red-700">Verification Mismatch</h3>
-            </div>
-            <div className="space-y-2 mb-6">
-              {verificationMismatch.map((msg, i) => (
-                <p key={i} className="text-sm text-gray-700 bg-red-50 p-3 rounded-lg">{msg}</p>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              The information you provided does not match your government ID. This session will be terminated.
-            </p>
-            <button
-              onClick={handleMismatchEndCall}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg transition-colors"
-            >
-              End Call
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-100 border-b">
         <div className="flex items-center gap-3">
@@ -245,7 +190,10 @@ export default function VideoCall() {
           <span className="text-sm text-gray-600">{isConnected ? "Connected" : "Connecting..."}</span>
         </div>
         <span className="text-sm font-mono text-gray-700">{formatTime(callDuration)}</span>
-        {shouldEndCall && (
+        {verificationFailed && (
+          <span className="text-sm text-red-600 font-medium animate-pulse">Verification Failed</span>
+        )}
+        {shouldEndCall && !verificationFailed && (
           <span className="text-sm text-orange-600 font-medium animate-pulse">Completing...</span>
         )}
       </div>
