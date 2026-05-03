@@ -6,7 +6,7 @@ Built with 6 open-source ML models running locally: Whisper V3 (STT), InsightFac
 
 ## Demo Video
 
-[![Watch the demo](https://drive.google.com/thumbnail?id=1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1&sz=w1280)](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
+[![Watch the demo](demo-thumbnail.png)](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
 
 [Watch full demo on Google Drive](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
 
