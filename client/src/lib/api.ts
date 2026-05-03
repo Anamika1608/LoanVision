@@ -31,3 +31,27 @@ export async function endSession(sessionId: string) {
   const { data } = await api.patch<{ sessionId: string; status: string; duration: number }>(`/session/${sessionId}/end`);
   return data;
 }
+
+export async function submitApplication(body: {
+  sessionId: string;
+  entities: Record<string, unknown>;
+  cvResults: Record<string, unknown>;
+}) {
+  const { data } = await api.post("/application", body);
+  return data;
+}
+
+export async function getOffer(sessionId: string) {
+  const { data } = await api.get(`/application/${sessionId}/offer`);
+  return data;
+}
+
+export async function acceptOffer(sessionId: string, selectedTenure: number) {
+  const { data } = await api.patch(`/application/${sessionId}/offer/accept`, { selectedTenure });
+  return data;
+}
+
+export async function declineOffer(sessionId: string) {
+  const { data } = await api.patch(`/application/${sessionId}/offer/decline`);
+  return data;
+}

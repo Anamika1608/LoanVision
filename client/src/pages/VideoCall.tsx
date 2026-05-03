@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { startSession, endSession } from "../lib/api";
+import { startSession, endSession, submitApplication } from "../lib/api";
 import { useSocket } from "../hooks/useSocket";
 import { useMediaStream } from "../hooks/useMediaStream";
 import { useAudioCapture } from "../hooks/useAudioCapture";
@@ -159,6 +159,17 @@ export default function VideoCall() {
     if (sessionId) {
       emit("leave-session", sessionId);
       await endSession(sessionId).catch(console.error);
+      await submitApplication({
+        sessionId,
+        entities: entities as Record<string, unknown>,
+        cvResults: {
+          face_match_score: faceResult?.face_match_score ?? null,
+          liveness_blink: faceResult?.liveness?.ear_left != null,
+          estimated_age: faceResult?.age ?? null,
+          estimated_gender: faceResult?.gender ?? null,
+          id_verification: idVerification,
+        },
+      }).catch(console.error);
     }
     navigate(`/offer/${sessionId}`);
   };
