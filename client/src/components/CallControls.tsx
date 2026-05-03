@@ -4,7 +4,6 @@ interface CallControlsProps {
   onToggleMute: () => void;
   onToggleCamera: () => void;
   onEndCall: () => void;
-  onUploadId: () => void;
 }
 
 export default function CallControls({
@@ -13,7 +12,6 @@ export default function CallControls({
   onToggleMute,
   onToggleCamera,
   onEndCall,
-  onUploadId,
 }: CallControlsProps) {
   return (
     <div className="flex items-center justify-center gap-4 py-3 px-4 bg-gray-900 rounded-xl">
@@ -35,14 +33,6 @@ export default function CallControls({
         title={isCameraOff ? "Turn camera on" : "Turn camera off"}
       >
         {isCameraOff ? "Cam Off" : "Cam On"}
-      </button>
-
-      <button
-        onClick={onUploadId}
-        className="p-3 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
-        title="Upload ID photo"
-      >
-        Upload ID
       </button>
 
       <button

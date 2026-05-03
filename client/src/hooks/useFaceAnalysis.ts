@@ -8,7 +8,6 @@ export interface FaceResult {
   gender?: string;
   bbox?: { x: number; y: number; width: number; height: number };
   liveness?: { ear_left?: number; ear_right?: number };
-  face_match_score?: number;
 }
 
 export function useFaceAnalysis(

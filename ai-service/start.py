@@ -17,19 +17,19 @@ def preload_models():
     get_model()
     print(f"       Done in {time.time() - t:.1f}s")
 
-    print("[2/4] Loading InsightFace (face analysis)...")
+    print("[2/4] Loading MediaPipe (face detection + liveness)...")
     t = time.time()
-    from services.face_analysis import get_app
-    get_app()
-    print(f"       Done in {time.time() - t:.1f}s")
-
-    print("[3/4] Loading MediaPipe (liveness)...")
-    t = time.time()
-    from services.liveness import get_landmarker
+    from services.mediapipe_shared import get_landmarker
     get_landmarker()
     print(f"       Done in {time.time() - t:.1f}s")
 
-    print("[4/4] Initializing Gemini LLM...")
+    print("[3/4] Loading ViT Age/Gender model...")
+    t = time.time()
+    from services.face_analysis import get_age_gender_model
+    get_age_gender_model()
+    print(f"       Done in {time.time() - t:.1f}s")
+
+    print("[4/4] Initializing Groq LLM...")
     t = time.time()
     from services.llm_agent import get_llm
     get_llm()

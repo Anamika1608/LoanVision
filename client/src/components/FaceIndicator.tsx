@@ -19,14 +19,9 @@ export default function FaceIndicator({ faceResult }: FaceIndicatorProps) {
         <span className={`w-2 h-2 rounded-full ${faceResult.face_detected ? "bg-green-400" : "bg-red-400"}`} />
         <span>{faceResult.face_detected ? "Face detected" : "No face"}</span>
       </div>
-      {faceResult.face_detected && faceResult.age && (
+      {faceResult.face_detected && faceResult.gender && (
         <div className="text-gray-300">
-          Age: ~{faceResult.age} | {faceResult.gender}
-        </div>
-      )}
-      {faceResult.face_match_score != null && (
-        <div className="text-gray-300">
-          Match: {(faceResult.face_match_score * 100).toFixed(0)}%
+          {faceResult.gender}
         </div>
       )}
     </div>

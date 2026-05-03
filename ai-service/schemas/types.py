@@ -34,7 +34,6 @@ class AnalyzeFrameResponse(BaseModel):
     gender: str | None = None
     bbox: BBox | None = None
     liveness: LivenessDetails | None = None
-    face_match_score: float | None = None
 
 
 class RegisterIdPhotoResponse(BaseModel):

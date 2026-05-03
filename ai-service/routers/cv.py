@@ -2,7 +2,7 @@ import asyncio
 
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 
-from schemas.types import AnalyzeFrameResponse, RegisterIdPhotoResponse, LivenessChallengeResponse, LivenessDetails
+from schemas.types import AnalyzeFrameResponse, LivenessChallengeResponse, LivenessDetails
 from services import redis_client, face_analysis, liveness
 from utils.image import bytes_to_rgb
 
@@ -28,13 +28,6 @@ async def analyze_frame(
         await redis_client.publish(f"cv_result:{session_id}", {"face_detected": False})
         return response
 
-    face_match_score = None
-    embedding = result.pop("embedding", None)
-    if embedding is not None:
-        face_match_score = await loop.run_in_executor(
-            None, face_analysis.compare_faces, embedding, session_id
-        )
-
     liveness_result = await loop.run_in_executor(None, liveness.check_blink, image_rgb)
 
     response = AnalyzeFrameResponse(
@@ -46,37 +39,21 @@ async def analyze_frame(
             ear_left=liveness_result.get("ear_left"),
             ear_right=liveness_result.get("ear_right"),
         ),
-        face_match_score=face_match_score,
     )
 
     publish_data = {
         "face_detected": True,
         "age": result["age"],
         "gender": result["gender"],
-        "face_match_score": face_match_score,
     }
     await redis_client.publish(f"cv_result:{session_id}", publish_data)
 
     return response
 
 
-@router.post("/register-id-photo", response_model=RegisterIdPhotoResponse)
-async def register_id_photo(
-    file: UploadFile = File(...),
-    session_id: str = Form(...),
-):
-    image_bytes = await file.read()
-    if not image_bytes:
-        raise HTTPException(status_code=400, detail="Empty image file")
-
-    image_rgb = bytes_to_rgb(image_bytes)
-
-    loop = asyncio.get_event_loop()
-    registered = await loop.run_in_executor(
-        None, face_analysis.register_id_photo, session_id, image_rgb
-    )
-
-    return RegisterIdPhotoResponse(registered=registered, face_detected=registered)
+@router.post("/register-id-photo")
+async def register_id_photo():
+    raise HTTPException(status_code=501, detail="Face matching temporarily unavailable")
 
 
 @router.post("/liveness-challenge", response_model=LivenessChallengeResponse)

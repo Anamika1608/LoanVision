@@ -13,8 +13,6 @@ import TranscriptPanel from "../components/TranscriptPanel";
 import AgentBubble from "../components/AgentBubble";
 import FaceIndicator from "../components/FaceIndicator";
 import LivenessOverlay from "../components/LivenessOverlay";
-import IdUploadModal from "../components/IdUploadModal";
-
 export default function VideoCall() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -28,7 +26,6 @@ export default function VideoCall() {
   const { agentMessage, shouldEndCall, isThinking, processTranscript } = useLLMAgent(sessionId);
   const { activeChallenge, challengePassed, triggerChallenge, stopLiveness } = useLiveness(sessionId, videoRef, on);
 
-  const [showIdUpload, setShowIdUpload] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [ending, setEnding] = useState(false);
   const lastProcessedRef = useRef("");
@@ -169,18 +166,9 @@ export default function VideoCall() {
           onToggleMute={toggleMute}
           onToggleCamera={toggleCamera}
           onEndCall={handleEndCall}
-          onUploadId={() => setShowIdUpload(true)}
         />
       </div>
 
-      {/* ID Upload Modal */}
-      {showIdUpload && sessionId && (
-        <IdUploadModal
-          sessionId={sessionId}
-          onComplete={() => setShowIdUpload(false)}
-          onClose={() => setShowIdUpload(false)}
-        />
-      )}
     </div>
   );
 }
