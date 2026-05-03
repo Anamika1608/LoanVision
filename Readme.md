@@ -6,9 +6,9 @@ Built with 6 open-source ML models running locally: Whisper V3 (STT), InsightFac
 
 ## Demo Video
 
-[![Watch the demo](demo-thumbnail.png)](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
+<video src="https://github.com/Anamika1608/tenzorx-hack/raw/main/demo.mp4" controls width="100%"></video>
 
-[Watch full demo on Google Drive](https://drive.google.com/file/d/1Y_IrRaNn9tUjrDaSk8y5Lnzy6jRkQKI1/view?usp=sharing)
+[Download demo video](demo.mp4)
 
 ## Flow Diagram
 
