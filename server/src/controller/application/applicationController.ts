@@ -180,7 +180,8 @@ function generateOfferData(entities: Entities, riskBand: string) {
 export const createApplication = async (
   sessionId: string,
   entities: Entities,
-  cvResults: CvResults
+  cvResults: CvResults,
+  userId?: string
 ) => {
   const nameParts = (entities.full_name || "").split(" ");
   const firstName = nameParts[0] || null;
@@ -191,6 +192,7 @@ export const createApplication = async (
     .insert(application)
     .values({
       sessionId,
+      userId: userId || undefined,
       status: "submitted",
       firstName,
       lastName,

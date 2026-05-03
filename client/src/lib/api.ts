@@ -5,7 +5,49 @@ const api = axios.create({
   withCredentials: true
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && !window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+
+export async function loginUser(email: string, password: string) {
+  const { data } = await api.post("/auth/login", { email, password });
+  return data;
+}
+
+export async function registerUser(body: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone?: string;
+}) {
+  const { data } = await api.post("/auth/register", body);
+  return data;
+}
+
+export async function getMe() {
+  const { data } = await api.get("/auth/me");
+  return data;
+}
+
+export async function logoutUser() {
+  const { data } = await api.post("/auth/logout");
+  return data;
+}
+
+export async function getMyApplications() {
+  const { data } = await api.get("/dashboard/my-applications");
+  return data;
+}
 
 export async function validateCampaign(code: string) {
   const { data } = await api.get<{ valid: boolean; productType: string; campaignName: string }>(`/campaign/${code}`);
@@ -53,6 +95,22 @@ export async function acceptOffer(sessionId: string, selectedTenure: number) {
 
 export async function declineOffer(sessionId: string) {
   const { data } = await api.patch(`/application/${sessionId}/offer/decline`);
+  return data;
+}
+
+export async function listCampaigns() {
+  const { data } = await api.get("/campaign");
+  return data;
+}
+
+export async function createCampaign(body: {
+  name: string;
+  channel: string;
+  productType: string;
+  maxUses: number;
+  expiresAt: string;
+}) {
+  const { data } = await api.post("/campaign", body);
   return data;
 }
 

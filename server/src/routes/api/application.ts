@@ -18,7 +18,8 @@ const router = Router();
 router.route("/").post(validateRequest(createApplicationSchema), async (req, res, next) => {
   try {
     const { sessionId, entities, cvResults } = req.body;
-    const result = await createApplication(sessionId, entities, cvResults || {});
+    const userId = req.session?.userId;
+    const result = await createApplication(sessionId, entities, cvResults || {}, userId);
     return res.status(201).json(result);
   } catch (error) {
     next(error);

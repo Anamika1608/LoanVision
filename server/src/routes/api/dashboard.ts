@@ -1,12 +1,13 @@
 import { Router } from "express";
 
-import { getDashboardData, getApplicationDetail } from "src/controller/dashboard/dashboardController";
+import { getDashboardData, getApplicationDetail, getUserApplications } from "src/controller/dashboard/dashboardController";
 import { applicationDetailParamSchema } from "src/controller/dashboard/dashboardSchema";
 import { validateRequest } from "src/middleware/validateRequest";
+import { onlyAdmin, onlyIfLoggedIn } from "src/middleware/authCheck";
 
 const router = Router();
 
-router.route("/").get(async (req, res, next) => {
+router.route("/").get(onlyAdmin, async (req, res, next) => {
   try {
     const data = await getDashboardData();
     return res.status(200).json(data);
@@ -15,7 +16,18 @@ router.route("/").get(async (req, res, next) => {
   }
 });
 
+router.route("/my-applications").get(onlyIfLoggedIn, async (req, res, next) => {
+  try {
+    const userId = req.session.userId!;
+    const data = await getUserApplications(userId);
+    return res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.route("/application/:applicationId").get(
+  onlyAdmin,
   validateRequest(applicationDetailParamSchema),
   async (req, res, next) => {
     try {

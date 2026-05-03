@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { validateCampaign, createSession } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function CampaignLanding() {
   const { campaignCode } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [campaign, setCampaign] = useState<{ campaignName: string; productType: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +30,10 @@ export default function CampaignLanding() {
 
   const handleStart = async () => {
     if (!campaignCode || !consented) return;
+    if (!user) {
+      navigate(`/login?redirect=/apply/${campaignCode}`);
+      return;
+    }
     setStarting(true);
 
     let geoLatitude: number | undefined;

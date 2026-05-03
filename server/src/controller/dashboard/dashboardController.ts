@@ -59,6 +59,26 @@ export const getDashboardData = async () => {
   };
 };
 
+export const getUserApplications = async (userId: string) => {
+  const rows = await db
+    .select()
+    .from(application)
+    .leftJoin(riskAssessment, eq(riskAssessment.applicationId, application.id))
+    .leftJoin(offer, eq(offer.applicationId, application.id))
+    .leftJoin(session, eq(session.id, application.sessionId))
+    .where(eq(session.userId, userId))
+    .orderBy(sql`${application.createdAt} DESC`);
+
+  return {
+    applications: rows.map((r) => ({
+      application: r.applications,
+      riskAssessment: r.risk_assessments || null,
+      offer: r.offers || null,
+      session: r.sessions || null,
+    })),
+  };
+};
+
 export const getApplicationDetail = async (applicationId: string) => {
   const [row] = await db
     .select()

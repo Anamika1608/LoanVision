@@ -35,3 +35,5 @@ export const auditEventTypeEnum = pgEnum("audit_event_type", [
 ]);
 
 export const auditSourceEnum = pgEnum("audit_source", ["client", "server", "ai-service"]);
+
+export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);

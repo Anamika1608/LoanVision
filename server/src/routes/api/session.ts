@@ -3,10 +3,11 @@ import { Router } from "express";
 import { createSessionSchema, sessionIdParamSchema } from "src/controller/session/sessionSchema";
 import { createSession, startSession, endSession, getSession } from "src/controller/session/sessionController";
 import { validateRequest } from "src/middleware/validateRequest";
+import { onlyIfLoggedIn } from "src/middleware/authCheck";
 
 const router = Router();
 
-router.route("/").post(validateRequest(createSessionSchema), async (req, res, next) => {
+router.route("/").post(onlyIfLoggedIn, validateRequest(createSessionSchema), async (req, res, next) => {
   try {
     const { campaignCode, geoLatitude, geoLongitude, deviceInfo } = req.body;
     const userId = req.session.userId;
