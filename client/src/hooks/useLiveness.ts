@@ -68,11 +68,17 @@ export function useLiveness(
     [startChallenge]
   );
 
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+  const stopLiveness = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setActiveChallenge(null);
   }, []);
 
-  return { activeChallenge, challengePassed, triggerChallenge };
+  useEffect(() => {
+    return stopLiveness;
+  }, [stopLiveness]);
+
+  return { activeChallenge, challengePassed, triggerChallenge, stopLiveness };
 }

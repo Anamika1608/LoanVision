@@ -24,9 +24,9 @@ export default function VideoCall() {
     useMediaStream();
   const audioCapture = useAudioCapture();
   const { transcript, fullText, isProcessing, sendAudioChunk, addAgentMessage } = useTranscription(sessionId);
-  const { faceResult } = useFaceAnalysis(sessionId, videoRef, isActive);
+  const { faceResult, stopAnalysis } = useFaceAnalysis(sessionId, videoRef, isActive);
   const { agentMessage, shouldEndCall, isThinking, processTranscript } = useLLMAgent(sessionId);
-  const { activeChallenge, challengePassed, triggerChallenge } = useLiveness(sessionId, videoRef, on);
+  const { activeChallenge, challengePassed, triggerChallenge, stopLiveness } = useLiveness(sessionId, videoRef, on);
 
   const [showIdUpload, setShowIdUpload] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
@@ -90,12 +90,17 @@ export default function VideoCall() {
 
   const handleEndCall = async () => {
     setEnding(true);
+    stopAnalysis();
+    stopLiveness();
     audioCapture.stop();
     stop();
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
     if (sessionId) {
-      await endSession(sessionId).catch(console.error);
       emit("leave-session", sessionId);
+      await endSession(sessionId).catch(console.error);
     }
     navigate(`/offer/${sessionId}`);
   };

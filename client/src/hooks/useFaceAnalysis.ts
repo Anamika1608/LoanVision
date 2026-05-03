@@ -37,16 +37,21 @@ export function useFaceAnalysis(
     }
   }, [sessionId, videoRef]);
 
+  const stopAnalysis = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (!isActive || !sessionId) return;
 
     analyze();
     intervalRef.current = window.setInterval(analyze, intervalMs);
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isActive, sessionId, intervalMs, analyze]);
+    return stopAnalysis;
+  }, [isActive, sessionId, intervalMs, analyze, stopAnalysis]);
 
-  return { faceResult, setIntervalMs };
+  return { faceResult, setIntervalMs, stopAnalysis };
 }
