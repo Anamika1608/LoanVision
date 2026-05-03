@@ -14,9 +14,9 @@ export default function TranscriptPanel({ transcript, isProcessing }: Transcript
   }, [transcript]);
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
+    <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-3">
       {transcript.length === 0 && (
-        <p className="text-gray-400 text-sm text-center mt-8">Conversation will appear here...</p>
+        <p className="mt-8 text-center text-sm text-black/40">Conversation will appear here...</p>
       )}
 
       {transcript.map((entry) => (
@@ -27,8 +27,8 @@ export default function TranscriptPanel({ transcript, isProcessing }: Transcript
           <div
             className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
               entry.speaker === "user"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
+                ? "bg-soft-blue text-black"
+                : "bg-soft-yellow text-black"
             }`}
           >
             {entry.text}
@@ -38,7 +38,7 @@ export default function TranscriptPanel({ transcript, isProcessing }: Transcript
 
       {isProcessing && (
         <div className="flex justify-end">
-          <div className="bg-blue-100 text-blue-600 px-3 py-2 rounded-lg text-sm animate-pulse">
+          <div className="animate-pulse rounded-lg bg-soft-blue px-3 py-2 text-sm text-black/70">
             Listening...
           </div>
         </div>

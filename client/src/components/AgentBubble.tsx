@@ -7,16 +7,16 @@ export default function AgentBubble({ message, isThinking }: AgentBubbleProps) {
   if (!message && !isThinking) return null;
 
   return (
-    <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-3">
-      <div className="text-xs font-medium text-indigo-600 mb-1">AI Agent</div>
+    <div className="mb-3 rounded-2xl border border-black/10 bg-soft-blue p-4">
+      <div className="mb-1 text-xs font-medium text-black/70">AI Agent</div>
       {isThinking ? (
         <div className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" />
-          <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.1s]" />
-          <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-black/40" />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-black/40 [animation-delay:0.1s]" />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-black/40 [animation-delay:0.2s]" />
         </div>
       ) : (
-        <p className="text-sm text-gray-800">{message}</p>
+        <p className="text-sm text-black/80">{message}</p>
       )}
     </div>
   );

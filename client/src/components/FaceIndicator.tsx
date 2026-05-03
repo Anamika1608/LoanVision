@@ -7,20 +7,20 @@ interface FaceIndicatorProps {
 export default function FaceIndicator({ faceResult }: FaceIndicatorProps) {
   if (!faceResult) {
     return (
-      <div className="absolute top-3 left-3 bg-black/60 text-gray-300 text-xs px-2 py-1 rounded">
+      <div className="absolute left-3 top-3 rounded-full bg-white/85 px-3 py-1 text-xs text-black/70 backdrop-blur">
         Initializing...
       </div>
     );
   }
 
   return (
-    <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-2 rounded space-y-1">
+    <div className="absolute left-3 top-3 space-y-1 rounded-2xl border border-black/10 bg-white/90 px-3 py-2 text-xs text-black backdrop-blur">
       <div className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full ${faceResult.face_detected ? "bg-green-400" : "bg-red-400"}`} />
+        <span className={`h-2 w-2 rounded-full ${faceResult.face_detected ? "bg-black" : "bg-black/40"}`} />
         <span>{faceResult.face_detected ? "Face detected" : "No face"}</span>
       </div>
       {faceResult.face_detected && faceResult.gender && (
-        <div className="text-gray-300">
+        <div className="text-black/60">
           {faceResult.gender}
         </div>
       )}

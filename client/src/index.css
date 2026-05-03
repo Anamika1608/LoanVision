@@ -1,1 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+@theme {
+  --color-soft-blue: #dff2ff;
+  --color-soft-yellow: #fff8d8;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    font-family: "Inter", sans-serif;
+    color: #000;
+    background: linear-gradient(180deg, #f7fcff 0%, #fffef8 100%);
+  }
+}

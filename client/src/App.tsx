@@ -5,6 +5,7 @@ import VideoCall from "./pages/VideoCall";
 import OfferCard from "./pages/OfferCard";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/offer/:sessionId" element={<OfferCard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/landing" element={<Landing />} />
         </Route>
       </Routes>
     </BrowserRouter>
